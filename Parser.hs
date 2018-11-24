@@ -1,8 +1,13 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Parser (Word' (..), parseTextFromFile) where
 import Text.ParserCombinators.Parsec
+import Data.Hashable
+import GHC.Generics
 
 data Word' = Word' String | Start | End
-             deriving (Show, Eq)
+             deriving (Show, Eq, Generic)
+
+instance Hashable Word'
 
 punctuationChars = ";,:-\"'?!."
 alphaNumChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
