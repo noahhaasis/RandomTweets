@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Parser (Word' (..), parseTextFromFile) where
+module Parser (Word' (..), parseText, parseTextFromFile) where
 import Text.ParserCombinators.Parsec
 import Data.Hashable
 import GHC.Generics
@@ -31,5 +31,9 @@ text =  do
   words <- many parseWordAndSkip
   return (words)
 
+parseText :: String -> Either ParseError [Word']
+parseText s = parse text "" s
+
+-- TODO: Remove later if not in use
 parseTextFromFile :: String -> IO (Either ParseError [Word'])
 parseTextFromFile f = parseFromFile text f
