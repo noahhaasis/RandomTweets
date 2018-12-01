@@ -4,7 +4,8 @@ import Text.ParserCombinators.Parsec
 import Data.Hashable
 import GHC.Generics
 
-data Word' = Word' String | Start | End
+-- TODO: Test if everything still works after adding Punctuation (This is were TDD would have helped a lot)
+data Word' = Word' String | Punctuation String | Start | End
              deriving (Show, Eq, Generic)
 
 instance Hashable Word'
@@ -16,7 +17,7 @@ whitespace :: Parser Char
 whitespace = noneOf (punctuationChars ++ alphaNumChars)
 
 punctuation :: Parser Word'
-punctuation = (Word' . (:[])) <$> (oneOf punctuationChars)
+punctuation = Punctuation <$> many1 (oneOf punctuationChars)
 
 word :: Parser Word'
 word = punctuation <|> (Word' <$> (many1 $ oneOf alphaNumChars))
@@ -24,8 +25,8 @@ word = punctuation <|> (Word' <$> (many1 $ oneOf alphaNumChars))
 parseWordAndSkip :: Parser Word'
 parseWordAndSkip = word <* skipMany whitespace
 
--- Parse a text into a list of Word'. Punctuation is considered a word.
--- A sequence of alphanumeric characters is a word. Everything else is ignored.
+{- Parse a text into a list of Word'. Punctuation is considered a word.
+   A sequence of alphanumeric characters is a word. Everything else is ignored. -}
 text :: Parser [Word']
 text =  do
   words <- many parseWordAndSkip

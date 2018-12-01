@@ -32,13 +32,16 @@ wordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
           = \f -> runMaybeT . (>>= (MaybeT . f)) . MaybeT
         liftedNextWord :: m (Maybe Word') -> m (Maybe Word')
           = liftNext $ nextWord tbm
-        doubleSequence ::[m (Maybe Word')] -> m (Maybe [Word'])
+        doubleSequence :: [m (Maybe Word')] -> m (Maybe [Word'])
           = (sequence <$>) . (takeWhile isJust <$>) . sequence
 
+{- TODO: This will just concat all words without any whitespace in between. Add whitespace between all words
+         and after punctuation -}
 concatWords :: [Word'] -> String
 concatWords = foldr (\a b -> wordToStr a ++ b) ""
-  where wordToStr (Word' s) = s
-        wordToStr _         = ""
+  where wordToStr (Word' s)       = s
+        wordToStr (Punctuation s) = s
+        wordToStr _               = ""
 
 generateText :: String -> m (Maybe String)
 generateText t = undefined
