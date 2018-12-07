@@ -35,13 +35,15 @@ wordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
         doubleSequence :: [m (Maybe Word')] -> m (Maybe [Word'])
           = (sequence <$>) . (takeWhile isJust <$>) . sequence
 
-{- TODO: This will just concat all words without any whitespace in between. Add whitespace between all words
-         and after punctuation -}
+{- TODO: Handle apostrophes correctly. -}
 concatWords :: [Word'] -> String
-concatWords = foldr (\a b -> wordToStr a ++ b) ""
-  where wordToStr (Word' s)       = s
-        wordToStr (Punctuation s) = s
-        wordToStr _               = ""
+concatWords ws = case concatMap wordToStr ws of
+  ' ' : xs -> xs
+  xs       -> xs
+  where wordToStr (Word' w)       = ' ' : w  -- Prefix all words with a space
+        wordToStr (Punctuation p) = p
+        wordToStr Start           = ""
+        wordToStr End             = ""
 
 generateText :: String -> m (Maybe String)
 generateText t = undefined
