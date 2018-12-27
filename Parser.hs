@@ -11,7 +11,7 @@ data Word' = Word' String | Punctuation String | Start | End
 instance Hashable Word'
 
 punctuationChars = ";,:-\"'?!."
-alphaNumChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+alphaNumChars    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 whitespace :: Parser Char
 whitespace = noneOf (punctuationChars ++ alphaNumChars)
@@ -28,13 +28,11 @@ parseWordAndSkip = word <* skipMany whitespace
 {- Parse a text into a list of Word'. Punctuation is considered a word.
    A sequence of alphanumeric characters is a word. Everything else is ignored. -}
 text :: Parser [Word']
-text =  do
-  words <- many parseWordAndSkip
-  return (words)
+text = many parseWordAndSkip
 
 parseText :: String -> Either ParseError [Word']
-parseText s = parse text "" s
+parseText = parse text ""
 
 -- TODO: Remove later if not in use
 parseTextFromFile :: String -> IO (Either ParseError [Word'])
-parseTextFromFile f = parseFromFile text f
+parseTextFromFile = parseFromFile text
