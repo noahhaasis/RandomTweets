@@ -46,10 +46,9 @@ concatWords ws = case concatMap wordToStr ws of
         wordToStr Start           = ""
         wordToStr End             = ""
 
-
 generateText :: Random.MonadRandom m => String -> m (Maybe String)
 generateText t = case newSentence of
-  (Right s) -> s >>= (\w -> return $ concatWords <$> w)
+  (Right s) -> fmap concatWords <$> s
   (Left _)  -> pure Nothing
   where
     ws = parseText t
