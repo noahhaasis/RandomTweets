@@ -1,11 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
-import qualified Data.HashMap.Strict as Map
-import qualified Data.List as List
-import qualified Control.Monad.Random as Random
-import Data.Maybe
-import Control.Monad.Trans.Maybe
-import Parser
+import qualified Control.Monad.Random       as Random
+import           Control.Monad.Trans.Maybe
+import qualified Data.HashMap.Strict        as Map
+import qualified Data.List                  as List
+import           Data.Maybe
+import           Parser
 
 {- TODO: Move the generator into a seperate module -}
 type Transition = (Word', Word')
@@ -26,7 +26,7 @@ toTransitionProbabilityMap ts = Map.map probabilityOfElementsInList nextWordMap
 nextWord :: Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe Word')
 nextWord tbm w = sequence $ Random.fromList <$> Map.lookup w tbm
 
--- TODO: Prevent the list from being infinite
+{- TODO: Prevent the list from being infinite -}
 randomWordList :: forall m. Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe [Word'])
 randomWordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
   where liftNext :: (Word' -> m (Maybe Word')) -> (m (Maybe Word') -> m (Maybe Word'))
