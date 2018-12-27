@@ -7,7 +7,7 @@ import Data.Maybe
 import Control.Monad.Trans.Maybe
 import Parser
 
--- TODO: Move the generator into a seperate module
+{- TODO: Move the generator into a seperate module -}
 type Transition = (Word', Word')
 type TransitionProbabilityMap = Map.HashMap Word' [(Word', Rational)]
 
@@ -26,8 +26,9 @@ toTransitionProbabilityMap ts = Map.map probabilityOfElementsInList nextWordMap
 nextWord :: Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe Word')
 nextWord tbm w = sequence $ Random.fromList <$> Map.lookup w tbm
 
-wordList :: forall m. Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe [Word'])
-wordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
+-- TODO: Prevent the list from being infinite
+randomWordList :: forall m. Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe [Word'])
+randomWordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
   where liftNext :: (Word' -> m (Maybe Word')) -> (m (Maybe Word') -> m (Maybe Word'))
           = \f -> runMaybeT . (>>= (MaybeT . f)) . MaybeT
         liftedNextWord :: m (Maybe Word') -> m (Maybe Word')
@@ -45,8 +46,16 @@ concatWords ws = case concatMap wordToStr ws of
         wordToStr Start           = ""
         wordToStr End             = ""
 
-generateText :: String -> m (Maybe String)
-generateText t = undefined
+
+generateText :: Random.MonadRandom m => String -> m (Maybe String)
+generateText t = case newSentence of
+  (Right s) -> s >>= (\w -> return $ concatWords <$> w)
+  (Left _)  -> pure Nothing
+  where
+    ws = parseText t
+    ts = transitions <$> ws
+    tpm = toTransitionProbabilityMap <$> ts
+    newSentence = (randomWordList <$> tpm) <*> Right Start
 
 main :: IO ()
 main = return ()
