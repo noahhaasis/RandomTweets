@@ -29,12 +29,12 @@ nextWord tbm w = sequence $ Random.fromList <$> Map.lookup w tbm
 {- TODO: Prevent the list from being infinite -}
 randomWordList :: forall m. Random.MonadRandom m => TransitionProbabilityMap -> Word' -> m (Maybe [Word'])
 randomWordList tbm w = doubleSequence $ iterate liftedNextWord (pure $ Just w)
-  where liftNext :: (Word' -> m (Maybe Word')) -> (m (Maybe Word') -> m (Maybe Word'))
-          = \f -> runMaybeT . (>>= (MaybeT . f)) . MaybeT
-        liftedNextWord :: m (Maybe Word') -> m (Maybe Word')
+  where liftedNextWord :: m (Maybe Word') -> m (Maybe Word')
           = liftNext $ nextWord tbm
+        liftNext :: (Word' -> m (Maybe Word')) -> (m (Maybe Word') -> m (Maybe Word'))
+          = \f -> runMaybeT . (>>= (MaybeT . f)) . MaybeT
         doubleSequence :: [m (Maybe Word')] -> m (Maybe [Word'])
-          = (sequence <$>) . (takeWhile isJust <$>) . sequence
+          = ((sequence . takeWhile isJust) <$>) . sequence
 
 {- TODO: Handle apostrophes correctly. -}
 concatWords :: [Word'] -> String
